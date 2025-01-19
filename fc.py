@@ -12,7 +12,7 @@ from sklearn.metrics import precision_score, recall_score
 wandb.login(key="7a42f12b660e56058d2d911cc0036220b7629317")
 wandb.init(project="DeepLearningProject-CIFAR10-fc", config={
     "learning_rate": 0.01,
-    "epochs": 50,
+    "epochs": 400,
     "batch_size": 32
 })
 
@@ -23,7 +23,6 @@ config = wandb.config
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.softmax = nn.LogSoftmax(dim=1)
         self.relu = nn.ReLU()
         # self.fc7 = nn.Linear(32 * 32 * 3, 2048)
         self.fc6 = nn.Linear(32*32*3, 1024)
@@ -128,15 +127,15 @@ if train_on_gpu:
     model.cuda()
 
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(),lr=0.001,momentum=0.9)
-scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+optimizer = optim.SGD(model.parameters(),lr=0.001,momentum=0.9,weight_decay=5e-4)
+# scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 #----------------------------------------------------------------------------------------------------------------------
 #train the model
 # Training the model
 print("Now we train the model:")
 
 # Number of epochs to train the model
-n_epochs = 50
+n_epochs = 400
 valid_loss_min = np.inf  # Track change in validation loss
 
 for epoch in range(1, n_epochs + 1):
@@ -211,7 +210,7 @@ for epoch in range(1, n_epochs + 1):
         torch.save(model.state_dict(), 'model_cifar.pt')
         valid_loss_min = valid_loss
 
-    scheduler.step()
+    # scheduler.step()
 
 # Load the model with the lowest loss
 model.load_state_dict(torch.load('model_cifar.pt'))
