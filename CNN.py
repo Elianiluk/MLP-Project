@@ -1,13 +1,3 @@
-# This code defines a convolutional neural network (CNN) for image classification tasks using PyTorch.
-# CNNs are widely used in computer vision applications due to their ability to automatically learn spatial hierarchies of features.
-# This specific architecture is designed to handle image inputs and output classification probabilities for a multi-class classification problem.
-# In this code I create a CNN with 3 convolution layers and 3 fully-connected layers using the RELU activation function
-# I used the Cross Entropy function to compute the loss and the Adam optimizer for the gradient decent and weights update
-
-
-# writer- Elian Iluk
-# Email- elian10119@gmail.com
-#----------------------------------------------------------------------------------------------------------------------
 # Import libraries
 import torch
 import numpy as np
@@ -17,18 +7,18 @@ import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 import torch.nn as nn
 import torch.optim as optim
-# import wandb
+import wandb
 import sklearn
 from sklearn.metrics import precision_score, recall_score
 
-# wandb.login(key="7a42f12b660e56058d2d911cc0036220b7629317")
-# wandb.init(project="DeepLearningProject-CIFAR10-CNN", config={
-#     "learning_rate": 0.001,
-#     "epochs": 30,
-#     "batch_size": 32
-# })
-#
-# config = wandb.config
+wandb.login(key="7a42f12b660e56058d2d911cc0036220b7629317")
+wandb.init(project="DeepLearningProject-CIFAR10-CNN", config={
+    "learning_rate": 0.001,
+    "epochs": 400,
+    "batch_size": 32
+})
+
+config = wandb.config
 #----------------------------------------------------------------------------------------------------------------------
 # define the CNN architecture
 class Net(nn.Module):
@@ -57,13 +47,12 @@ class Net(nn.Module):
         self.fc3 = nn.Linear(256, 128)
         self.batchNorm7 = nn.BatchNorm1d(128)
 
-        self.fc4 = nn.Linear(128, 100)
+        self.fc4 = nn.Linear(128, 10)
         self.batchNorm8 = nn.BatchNorm1d(64)
-
-        # self.fc5 = nn.Linear(64, 10)
 
         self.dropout = nn.Dropout(0.5)
         self.relu = nn.ReLU()
+
 
     def forward(self, x):
         x = self.relu(self.batchNorm1(self.conv1(x)))
@@ -119,17 +108,14 @@ train_transform = transforms.Compose([
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(30),
     ])
-
 test_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
 # choose the training and test datasets
-train_data = datasets.CIFAR10('data', train=True,
-                              download=True, transform=train_transform)
-test_data = datasets.CIFAR10('data', train=False,
-                             download=True, transform=test_transform)
+train_data = datasets.CIFAR10('data', train=True,download=True, transform=train_transform)
+test_data = datasets.CIFAR10('data', train=False,download=True, transform=test_transform)
 
 # obtain training indices that will be used for validation
 num_train = len(train_data)
@@ -143,12 +129,9 @@ train_sampler = SubsetRandomSampler(train_idx)
 valid_sampler = SubsetRandomSampler(valid_idx)
 
 # prepare data loaders (combine dataset and sampler)
-train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size,
-    sampler=train_sampler, num_workers=num_workers)
-valid_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size,
-    sampler=valid_sampler, num_workers=num_workers)
-test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size,
-    num_workers=num_workers)
+train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size,sampler=train_sampler, num_workers=num_workers)
+valid_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size,sampler=valid_sampler, num_workers=num_workers)
+test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size,num_workers=num_workers)
 
 # specify the image classes
 # classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
@@ -160,10 +143,10 @@ images, labels = next(dataiter)
 images = images.numpy() # convert images to numpy for display
 # print(f"images shape is:{images.shape}")
 
-# # Plot the images in the batch, along with the corresponding labels
-# print("How the images we try to predict look like:")
-# fig = plt.figure(figsize=(25, 4))
-#
+# Plot the images in the batch, along with the corresponding labels
+print("How the images we try to predict look like:")
+fig = plt.figure(figsize=(25, 4))
+
 # # Display 20 images
 # for idx in np.arange(20):
 #     ax = fig.add_subplot(2, 10, idx + 1, xticks=[], yticks=[])
@@ -199,11 +182,11 @@ criterion = nn.CrossEntropyLoss()
 
 # specify optimizer-using Adam
 optimizer = optim.SGD(model.parameters(),lr=0.001,momentum=0.9,weight_decay=5e-4)
+
 #----------------------------------------------------------------------------------------------------------------------
 #train the model
 print("Training the model...")
-# n_epochs = config.epochs
-n_epochs = 30
+n_epochs = config.epochs
 valid_loss_min = np.inf
 
 for epoch in range(1, n_epochs + 1):
@@ -248,13 +231,13 @@ for epoch in range(1, n_epochs + 1):
     valid_accuracy = correct_valid / total_valid
 
     # Log metrics to WandB
-    # wandb.log({
-    #     "epoch": epoch,
-    #     "train_loss": train_loss,
-    #     "valid_loss": valid_loss,
-    #     "train_accuracy": train_accuracy,
-    #     "valid_accuracy": valid_accuracy
-    # })
+    wandb.log({
+        "epoch": epoch,
+        "train_loss": train_loss,
+        "valid_loss": valid_loss,
+        "train_accuracy": train_accuracy,
+        "valid_accuracy": valid_accuracy
+    })
 
     print(f"Epoch: {epoch} \tTrain Loss: {train_loss:.6f} \tValidation Loss: {valid_loss:.6f} "
           f"\tTrain Accuracy: {train_accuracy:.4f} \tValidation Accuracy: {valid_accuracy:.4f}")
@@ -271,8 +254,8 @@ model.load_state_dict(torch.load('model_cifar.pt'))
 # Test the model
 print("Testing the model...")
 test_loss = 0.0
-class_correct = [0. for _ in range(10)]
-class_total = [0. for _ in range(10)]
+class_correct = [0. for _ in range(100)]
+class_total = [0. for _ in range(100)]
 model.eval()
 y_true = []
 y_pred = []
@@ -305,12 +288,12 @@ print(f"Precision: {precision:.4f}")
 print(f"Recall: {recall:.4f}")
 
 # Log test results to WandB
-# wandb.log({
-#     "test_loss": test_loss,
-#     "test_accuracy": test_accuracy,
-#     "precision": precision,
-#     "recall": recall
-# })
+wandb.log({
+    "test_loss": test_loss,
+    "test_accuracy": test_accuracy,
+    "precision": precision,
+    "recall": recall
+})
 
 #----------------------------------------------------------------------------------------------------------------------
 # #visualize the results
