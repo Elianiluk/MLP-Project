@@ -46,7 +46,7 @@ class LogisticRegressionModel(nn.Module):
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
-        return self.softmax(self.linear(x))  # Output logits for CrossEntropyLoss
+        return self.softmax(self.linear(x))
 
 # Model Parameters
 input_size = 32 * 32 * 3  # CIFAR-10 images are 32x32 with 3 color channels
