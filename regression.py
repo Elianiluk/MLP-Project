@@ -106,7 +106,7 @@ for epoch in range(num_epochs):
         "train_loss": total_loss,
         "train_accuracy": train_accuracy
     })
-    
+
 end_time = time.time()
 print(f"time to train the mode: {end_time - start_time} seconds")
 
