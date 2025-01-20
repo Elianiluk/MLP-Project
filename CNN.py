@@ -10,6 +10,7 @@ import torch.optim as optim
 import wandb
 import sklearn
 from sklearn.metrics import precision_score, recall_score
+import time
 
 wandb.login(key="7a42f12b660e56058d2d911cc0036220b7629317")
 wandb.init(project="DeepLearningProject-CIFAR10-CNN", config={
@@ -188,6 +189,7 @@ optimizer = optim.SGD(model.parameters(),lr=0.001,momentum=0.9,weight_decay=5e-4
 print("Training the model...")
 n_epochs = config.epochs
 valid_loss_min = np.inf
+start_time = time.time()
 
 for epoch in range(1, n_epochs + 1):
     train_loss = 0.0
@@ -248,6 +250,9 @@ for epoch in range(1, n_epochs + 1):
         torch.save(model.state_dict(), 'model_cifar.pt')
         valid_loss_min = valid_loss
 
+end_time = time.time()
+
+print(f"time to train{end_time - start_time:.2f} seconds")
 # Load the best model
 model.load_state_dict(torch.load('model_cifar.pt'))
 
