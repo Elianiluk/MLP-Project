@@ -3,6 +3,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score
 import torchvision
 from torchvision.transforms import transforms
 import wandb
+import time
 
 # Initialize WandB
 wandb.login(key="7a42f12b660e56058d2d911cc0036220b7629317")
@@ -12,6 +13,7 @@ wandb.init(project="DeepLearningProject-CIFAR10-baseline")
 transform = transforms.ToTensor()
 test_dataset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
 
+start_time = time.time()
 # Step 2: Generate Random Predictions
 np.random.seed(42)
 num_classes = 10
@@ -21,6 +23,9 @@ random_predictions = np.random.randint(0, num_classes, size=len(test_dataset))
 
 # Step 3: Retrieve True Labels
 true_labels = [label for _, label in test_dataset]
+
+end_time = time.time()
+print(f"time to the model: {end_time - start_time} seconds")
 
 # Step 4: Calculate Metrics
 accuracy = accuracy_score(true_labels, random_predictions)
