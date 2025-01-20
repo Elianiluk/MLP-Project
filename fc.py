@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 import wandb
 from sklearn.metrics import precision_score, recall_score
+import time
 
 wandb.login(key="7a42f12b660e56058d2d911cc0036220b7629317")
 wandb.init(project="DeepLearningProject-CIFAR10-fc", config={
@@ -137,6 +138,7 @@ print("Now we train the model:")
 # Number of epochs to train the model
 n_epochs = 400
 valid_loss_min = np.inf  # Track change in validation loss
+start_time = time.time()
 
 for epoch in range(1, n_epochs + 1):
     # Keep track of training and validation loss and accuracy
@@ -212,6 +214,8 @@ for epoch in range(1, n_epochs + 1):
 
     # scheduler.step()
 
+end_time = time.time()
+print(f"time to train: {start_time-end_time} seconds")
 # Load the model with the lowest loss
 model.load_state_dict(torch.load('model_cifar.pt'))
 
