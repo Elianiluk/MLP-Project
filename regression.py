@@ -6,6 +6,7 @@ import torch.nn as nn
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 import torch.optim as optim
 import wandb
+import time
 
 # Initialize WandB
 wandb.login(key="7a42f12b660e56058d2d911cc0036220b7629317")
@@ -65,6 +66,7 @@ wandb.watch(model, log="all")
 # Step 4: Train the Model
 num_epochs = config.epochs
 device = "cuda" if torch.cuda.is_available() else "cpu"
+start_time = time.time()
 
 for epoch in range(num_epochs):
     model.train()
@@ -104,6 +106,9 @@ for epoch in range(num_epochs):
         "train_loss": total_loss,
         "train_accuracy": train_accuracy
     })
+    
+end_time = time.time()
+print(f"time to train the mode: {end_time - start_time} seconds")
 
 # Step 5: Evaluate the Model
 model.eval()
